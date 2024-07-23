@@ -15,7 +15,7 @@ class Logger:
         file_name = os.path.join(file_path, 'event.log')
         self._write_log(file_name, message)
         # For testing 
-        print(message)
+        # print(message)
 
     def log_error(self, message, file_path=None):
         if file_path is None:
@@ -25,5 +25,5 @@ class Logger:
 
     def _write_log(self, file_name, message):
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        with open(file_name, 'a') as file:
+        with open(file_name, 'a', encoding="utf-8") as file:
             file.write(f"{timestamp} - {message}\n")
