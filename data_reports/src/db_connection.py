@@ -23,7 +23,7 @@ class DB_Conn:
 
         self.db_type = db_type
         self.Data_Connection = DB_Conn.get_db_info(db_connection,db_type)       
-        print(self.Data_Connection)         
+        # print(self.Data_Connection)         
         self.host = self.Data_Connection["servidor"]
         self.port = self.Data_Connection["puerto"]
         self.sid = self.Data_Connection["sid"]
@@ -41,13 +41,13 @@ class DB_Conn:
 
     def get_db_info(filename,section):
 
-        print('Entre a get_db_info con estos parametros : ', filename, " - ", section)                    
+        # print('Entre a get_db_info con estos parametros : ', filename, " - ", section)                    
         parser=ConfigParser()
         parser.read(filename)
         db_info={}
 
         if parser.has_section(section):
-            print('Entre a if ')                    
+            # print('Entre a if ')                    
             # items() method returns (key,value) tuples
             key_val_tuple = parser.items(section) 
             for item in key_val_tuple:

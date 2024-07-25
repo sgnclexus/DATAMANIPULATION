@@ -7,7 +7,7 @@ from utils.logger import Logger
 from utils.StringSplitter import StringSplitter
 
 GET_DATA_APPLICATION = """
-
+    
     SELECT 
     APLI.APLI_ID
     ,APLI.APLI_ANO
@@ -23,26 +23,9 @@ GET_DATA_APPLICATION = """
     INNER JOIN APPDCGRL.GRL_APLICACION_RESULTADO_DETALLE APRD ON APRD.APRE_ID = APRE.APRE_ID                    
     WHERE 1=1
     AND APLI_ANO = 2019
-    AND APLI_CLAVE IN ('074304312')
-    -- AND ROWNUM < 2
-    UNION ALL
-    SELECT 
-    APLI.APLI_ID
-    ,APLI.APLI_ANO
-    ,APLI.APLI_CLAVE
-    ,INCO.INCO_ID
-    ,APRE.APRE_ID
-    ,APRD.APRD_CADENA
-    FROM APPDCGRL.GRL_APLICACION APLI
-    INNER JOIN APPDCGRL.CFG_INSTRUMENTO_CONFIGURACION INCO ON INCO.INCO_ID = APLI.INCO_ID
-    INNER JOIN APPDCGRL.GRL_INSTRUMENTO INTR ON INTR.INTR_ID = INCO.INTR_ID
-    INNER JOIN APPDCGRL.GRL_INSTRUMENTO_FAMILIA INFA ON INFA.INFA_ID = INTR.INFA_ID
-    INNER JOIN APPDCGRL.GRL_APLICACION_RESULTADO APRE ON APRE.APLI_ID = APLI.APLI_ID
-    INNER JOIN APPDCGRL.GRL_APLICACION_RESULTADO_DETALLE APRD ON APRD.APRE_ID = APRE.APRE_ID                    
-    WHERE 1=1
-    AND APLI_ANO = 2019
-    AND APLI_CLAVE IN ('058404312')
-    -- AND ROWNUM < 2
+    AND INFA.INFA_ID = 'EXANI'
+    AND INTR.INTR_ID = 71
+    -- AND INTR.INTR_TIPO_EXAMEN = 'EX2'    
 
 """
 
@@ -60,6 +43,8 @@ class Application:
 
     def data_building(self, year=2019, client="", family="EXANI", examination="EXANI-II", application_num="074304312"):
 
+        loader = Loader("Inicia ejecucion en paralelo para separa las cadenas","Tabla de aplicaciones concluida").start()        
+
         # We added the file location because jupyter and py script got differente locations
         # print("Directorio : ",Path(__file__).parent/"database.ini")
         databse_filepath = Path(__file__).parent/"database.ini"
@@ -72,8 +57,8 @@ class Application:
         definition_id = df_application["INCO_ID"].unique()
         df_definition = self.data_definition(db_connection, definition_id)
 
-        df_appdef = pd.merge(df_application, df_definition, how="inner", on=["INCO_ID"])
-        logger.log_event("Cantidad de registros del Merge : " + str(len(df_appdef)))
+        # df_appdef = pd.merge(df_application, df_definition, how="inner", on=["INCO_ID"])
+        # logger.log_event("Cantidad de registros del Merge : " + str(len(df_appdef)))
         # print(df_appdef)
 
         df_strings = df_application[["INCO_ID","APRD_CADENA"]] # df_appdef[["APRD_CADENA"]]
@@ -87,7 +72,11 @@ class Application:
         # print(dfseparado)
         dfseparado.to_csv("archivosep.csv", encoding="utf-8")
 
-        return df_appdef
+        loader.stop()
+
+        return dfseparado
+    
+
 
     def data_application(self, db_connection):
         
@@ -114,13 +103,25 @@ class Application:
 if __name__ == '__main__':
     
     logger = Logger()
-    application_building = Application()
-    start_time = time.time()    
-    logger.log_event(message="{} Inicia recuperación de datos BD Califica".format(start_time))
     
+    
+    start_time = time.time()    
+    logger.log_event(message="Inicia proceso de generacion de reportes")
+    
+    application_building = Application()
     application_building.data_building()
 
     end_time = time.time()
-    logger.log_event(message="{} Concluye recuperación de datos BD Califica".format(end_time))
+
+    segundos = end_time - start_time
+    segundos = segundos % (24 * 3600)
+    horas = segundos // 3600
+    segundos %= 3600
+    minutos = segundos // 60
+    segundos %= 60
+    msg = "Tiempo de ejecucion: %d horas, %02d minutos, %02d segundos" % (horas, minutos, segundos)    
+
+    logger.log_event(message=msg)
+    logger.log_event(message="Concluye proceso de generacion de reportes")
     
     
