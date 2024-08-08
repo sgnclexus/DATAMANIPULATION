@@ -30,11 +30,7 @@ class DB_Conn:
         self.user = self.Data_Connection["usuario"]
         self.password = self.Data_Connection["password"]
         self.encoding = self.Data_Connection["encoding"]
-        # self.host = "califica.db.ceneval.edu.mx"
-        # self.port = 1530
-        # self.database = "papps001"
-        # self.user = "APPCALIFICA"
-        # self.password = "8Nj+WLGQ"
+
 
         
         
